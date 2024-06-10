@@ -2,7 +2,6 @@ package main
 
 import (
 	"database/sql"
-	"fmt"
 	"math/rand"
 	"testing"
 	"time"
@@ -34,10 +33,7 @@ func getTestParcel() Parcel {
 func TestAddGetDelete(t *testing.T) {
 	// prepare
 	db, err := sql.Open("sqlite", "tracker.db") // настройте подключение к БД
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
+	require.NoError(t, err)
 	defer db.Close()
 	store := NewParcelStore(db)
 	parcel := getTestParcel()
@@ -54,19 +50,20 @@ func TestAddGetDelete(t *testing.T) {
 	res, err := store.Get(number)
 
 	require.NoError(t, err)
-	assert.Equal(t, parcel.Client, res.Client)
+	/*assert.Equal(t, parcel.Client, res.Client)
 	assert.Equal(t, parcel.Status, res.Status)
 	assert.Equal(t, parcel.Address, res.Address)
-	assert.Equal(t, parcel.CreatedAt, res.CreatedAt)
+	assert.Equal(t, parcel.CreatedAt, res.CreatedAt)*/
+	assert.Equal(t, parcel, res)
 
 	// delete
 	// удалите добавленную посылку, убедитесь в отсутствии ошибки
 	// проверьте, что посылку больше нельзя получить из БД
 	err = store.Delete(number)
 	require.NoError(t, err)
-
 	_, err = store.Get(number)
-	require.Equal(t, sql.ErrNoRows, err)
+	require.Error(t, err)
+	assert.ErrorIs(t, err, sql.ErrNoRows)
 
 }
 
@@ -74,10 +71,7 @@ func TestAddGetDelete(t *testing.T) {
 func TestSetAddress(t *testing.T) {
 	// prepare
 	db, err := sql.Open("sqlite", "tracker.db") // настройте подключение к БД
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
+	require.NoError(t, err)
 	defer db.Close()
 	store := NewParcelStore(db)
 	parcel := getTestParcel()
@@ -106,10 +100,7 @@ func TestSetAddress(t *testing.T) {
 func TestSetStatus(t *testing.T) {
 	// prepare
 	db, err := sql.Open("sqlite", "tracker.db") // настройте подключение к БД
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
+	require.NoError(t, err)
 	defer db.Close()
 	store := NewParcelStore(db)
 	parcel := getTestParcel()
@@ -136,10 +127,7 @@ func TestSetStatus(t *testing.T) {
 func TestGetByClient(t *testing.T) {
 	// prepare
 	db, err := sql.Open("sqlite", "tracker.db") // настройте подключение к БД
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
+	require.NoError(t, err)
 	defer db.Close()
 	store := NewParcelStore(db)
 

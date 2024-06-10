@@ -56,6 +56,7 @@ func (s ParcelStore) GetByClient(client int) ([]Parcel, error) {
 	if err != nil {
 		return nil, err
 	}
+	defer rows.Close()
 	for rows.Next() {
 		parcel := Parcel{}
 
@@ -87,9 +88,10 @@ func (s ParcelStore) SetStatus(number int, status string) error {
 // реализуйте обновление адреса в таблице parcel
 // менять адрес можно только если значение статуса registered
 func (s ParcelStore) SetAddress(number int, address string) error {
-	_, err := s.db.Exec("UPDATE parcel SET address = :address WHERE number = :number and status = 'registered'",
+	_, err := s.db.Exec("UPDATE parcel SET address = :address WHERE number = :number and status = :status",
 		sql.Named("address", address),
-		sql.Named("number", number))
+		sql.Named("number", number),
+		sql.Named("status", ParcelStatusRegistered))
 	if err != nil {
 		return err
 	}
@@ -99,7 +101,9 @@ func (s ParcelStore) SetAddress(number int, address string) error {
 // реализуйте удаление строки из таблицы parcel
 // удалять строку можно только если значение статуса registered
 func (s ParcelStore) Delete(number int) error {
-	_, err := s.db.Exec("DELETE FROM parcel WHERE number = :number and status='registered'", sql.Named("number", number))
+	_, err := s.db.Exec("DELETE FROM parcel WHERE number = :number and status=:status",
+		sql.Named("number", number),
+		sql.Named("status", ParcelStatusRegistered))
 	if err != nil {
 		return err
 	}
